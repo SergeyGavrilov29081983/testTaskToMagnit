@@ -8,6 +8,9 @@ import ru.util.XmlWriter;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,11 +18,14 @@ public class Main {
 
     private static int n = 5;
 
-    public static void main(String[] args) throws JAXBException, TransformerException {
+    public static void main(String[] args) throws JAXBException, TransformerException, SQLException {
 
-        Repository repository = new Repository();
-        repository.deleteAll();
-        repository.saveAll(n);
+        Repository repository = new Repository("jdbc:postgresql://127.0.0.1:5432/test", "user", "password");
+        repository.clear();
+        for (int i = 0; i < n; i++) {
+            Model model = new Model(i);
+            repository.save(model);
+        }
         List<Model> models = repository.getAll();
         List<Integer> values = new ArrayList<>();
 
@@ -37,7 +43,6 @@ public class Main {
         }
 
         writer.write("src/main/resources/1.xml", entries);
-
         XmlTransform xmlTransform = new XmlTransform();
         xmlTransform.transform();
 
